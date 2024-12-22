@@ -1,3 +1,7 @@
 venv
 .idea
 ~$*.rtf
+env.*
+!env.template
+.pytest_cache
+*__pycache__*

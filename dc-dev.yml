@@ -1,0 +1,93 @@
+networks:
+  equarium_dev:
+
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: $DB_NAME
+      POSTGRES_USER: $DB_USER
+      POSTGRES_PASSWORD: $DB_PASSWORD
+    volumes:
+      - equarium_pg_dev:/var/lib/postgresql/data
+      - type: bind
+        source: init-db.sh
+        target: /docker-entrypoint-initdb.d/init-user-db.sh
+    healthcheck:
+      test:
+        - CMD
+        - pg_isready
+        - -q
+        - -d
+        - $DB_NAME
+        - -U
+        - $DB_USER
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: always
+    ports:
+      - $DB_PORT:5432
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: m@m.ru
+      PGADMIN_DEFAULT_PASSWORD: m
+    healthcheck:
+      test: [ "CMD", "wget", "-O", "-", "http://localhost:80/misc/ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    ports:
+      - 8083:80
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - equarium_pgadmin_dev:/var/lib/pgadmi
+
+  dbup:
+    env_file: 'env.dev'
+    environment:
+      DB_HOST: db
+    image: dbup
+    build:
+      context: .
+      target: dbup
+    depends_on:
+      - db
+
+  auth:
+    image: auth
+    build:
+      context: .
+      target: auth
+    env_file: 'env.dev'
+    environment:
+      DB_HOST: db
+    ports:
+      - 8081:8000
+    depends_on:
+      - db
+      - dbup
+
+  trans:
+    image: trans
+    build:
+      context: .
+      target: trans
+    env_file: 'env.dev'
+    environment:
+      DB_HOST: db
+    ports:
+      - 8082:8000
+    depends_on:
+      - db
+      - dbup
+
+volumes:
+  equarium_pg_dev:
+  equarium_pgadmin_dev:
