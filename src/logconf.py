@@ -72,11 +72,15 @@ LOGGING_CONFIG = {
             'handlers': ['console'],
             'level': LOGLEVEL
         },
-        'AUTH': {
+        'passlib': {
             'handlers': ['console'],
             'level': LOGLEVEL
         },
-        'TRANS': {
+        'auth': {
+            'handlers': ['console'],
+            'level': LOGLEVEL
+        },
+        'trans': {
             'handlers': ['console'],
             'level': LOGLEVEL
         },

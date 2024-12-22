@@ -1,3 +1,3 @@
 import logging
 
-logger = logging.getLogger('TRANS')
+logger = logging.getLogger('trans')
